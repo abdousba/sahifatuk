@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صحيفتك - تذكير المسلم بأعماله اليومية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #2c7744;
+            --secondary-color: #5a3e1b;
+            --good-color: #28a745;
+            --bad-color: #dc3545;
+            --light-bg: #f8f5f0;
+            --text-dark: #333;
+            --text-light: #777;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            direction: rtl;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f8f5f0"/><path d="M0,0 Q50,20 100,0 T100,100 Q50,80 0,100 Z" fill="%23e8e2d6" opacity="0.2"/></svg>');
+            background-size: cover;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .add-action {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eae6df;
+        }
+        
+        .add-action::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+        }
+        
+        .add-action h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .add-action h2 i {
+            background: rgba(44, 119, 68, 0.1);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1.2rem;
+        }
+        
+        .action-input {
+            flex: 1;
+            padding: 1rem 1.2rem;
+            border: 2px solid #eae6df;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            outline: none;
+        }
+        
+        .action-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 119, 68, 0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 1rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-good {
+            background: var(--good-color);
+            color: white;
+        }
+        
+        .btn-bad {
+            background: var(--bad-color);
+            color: white;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eae6df;
+            position: relative;
+        }
+        
+        .stat-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .stat-card h3 i {
+            background: rgba(44, 119, 68, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin-top: 1rem;
+        }
+        
+        .actions-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .actions-column {
+            background: white;
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eae6df;
+        }
+        
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .good-header h4 {
+            color: var(--good-color);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bad-header h4 {
+            color: var(--bad-color);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .count-badge {
+            background: var(--light-bg);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .good-count {
+            color: var(--good-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+        
+        .bad-count {
+            color: var(--bad-color);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        .actions-list {
+            list-style: none;
+        }
+        
+        .action-item {
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            animation: fadeIn 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+        }
+        
+        .good-action {
+            background: rgba(40, 167, 69, 0.08);
+            border: 1px solid rgba(40, 167, 69, 0.15);
+        }
+        
+        .good-action::before {
+            background: var(--good-color);
+        }
+        
+        .bad-action {
+            background: rgba(220, 53, 69, 0.08);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+        }
+        
+        .bad-action::before {
+            background: var(--bad-color);
+        }
+        
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .good-action .action-icon {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--good-color);
+        }
+        
+        .bad-action .action-icon {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--bad-color);
+        }
+        
+        .action-details {
+            flex: 1;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        
+        .action-time {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        
+        .action-delete {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .action-delete:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--bad-color);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid #eae6df;
+            margin-top: 2rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-book-quran"></i>
+            <div>
+                <h1>صحيفتك</h1>
+                <p class="subtitle">تذكير المسلم بأعماله اليومية من خير أو شر، لتكون صفحتك بيضاء نقية يوم القيامة</p>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <section class="add-action">
+            <h2><i class="fas fa-plus-circle"></i> أضف عملاً جديداً</h2>
+            <div class="input-group">
+                <input type="text" class="action-input" id="action-input" placeholder="اكتب عملك هنا...">
+                <div class="action-buttons">
+                    <button class="btn btn-good" id="add-good"><i class="fas fa-hands-praying"></i> حسنة</button>
+                    <button class="btn btn-bad" id="add-bad"><i class="fas fa-hand-fist"></i> سيئة</button>
+                </div>
+            </div>
+        </section>
+        
+        <section class="stats-section">
+            <div class="stat-card">
+                <h3><i class="fas fa-sun"></i> إحصائيات اليوم</h3>
+                <div class="stats">
+                    <p>الحسنات: <span id="good-count-day">0</span></p>
+                    <p>السيئات: <span id="bad-count-day">0</span></p>
+                    <p>النسبة: <span id="ratio-day">0%</span></p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="daily-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <h3><i class="fas fa-calendar"></i> إحصائيات الشهر</h3>
+                <div class="stats">
+                    <p>الحسنات: <span id="good-count-month">0</span></p>
+                    <p>السيئات: <span id="bad-count-month">0</span></p>
+                    <p>النسبة: <span id="ratio-month">0%</span></p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthly-chart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <section class="actions-container">
+            <div class="actions-column">
+                <div class="column-header good-header">
+                    <h4><i class="fas fa-smile"></i> أعمالي الصالحة</h4>
+                    <div class="count-badge good-count"><span id="good-count">0</span> حسنة</div>
+                </div>
+                <ul class="actions-list" id="good-actions-list">
+                    <!-- سيتم إضافة الأعمال الصالحة هنا عبر الجافاسكريبت -->
+                </ul>
+            </div>
+            
+            <div class="actions-column">
+                <div class="column-header bad-header">
+                    <h4><i class="fas fa-frown"></i> أعمالي السيئة</h4>
+                    <div class="count-badge bad-count"><span id="bad-count">0</span> سيئة</div>
+                </div>
+                <ul class="actions-list" id="bad-actions-list">
+                    <!-- سيتم إضافة الأعمال السيئة هنا عبر الجافاسكريبت -->
+                </ul>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <p>صحيفتك - تذكير المسلم بأعماله اليومية من خير أو شر &copy; 2023</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // تهيئة البيانات
+            let actions = JSON.parse(localStorage.getItem('actions')) || [];
+            
+            // عناصر واجهة المستخدم
+            const actionInput = document.getElementById('action-input');
+            const addGoodBtn = document.getElementById('add-good');
+            const addBadBtn = document.getElementById('add-bad');
+            const goodList = document.getElementById('good-actions-list');
+            const badList = document.getElementById('bad-actions-list');
+            const goodCount = document.getElementById('good-count');
+            const badCount = document.getElementById('bad-count');
+            const goodCountDay = document.getElementById('good-count-day');
+            const badCountDay = document.getElementById('bad-count-day');
+            const ratioDay = document.getElementById('ratio-day');
+            const goodCountMonth = document.getElementById('good-count-month');
+            const badCountMonth = document.getElementById('bad-count-month');
+            const ratioMonth = document.getElementById('ratio-month');
+            
+            // المخططات
+            const dailyCtx = document.getElementById('daily-chart').getContext('2d');
+            const monthlyCtx = document.getElementById('monthly-chart').getContext('2d');
+            let dailyChart, monthlyChart;
+            
+            // تحديث الواجهة
+            function updateUI() {
+                updateLists();
+                updateStats();
+                updateCharts();
+            }
+            
+            // تحديث القوائم
+            function updateLists() {
+                goodList.innerHTML = '';
+                badList.innerHTML = '';
+                
+                let goodCounter = 0;
+                let badCounter = 0;
+                
+                actions.forEach((action, index) => {
+                    const li = document.createElement('li');
+                    li.className = `action-item ${action.type === 'good' ? 'good-action' : 'bad-action'}`;
+                    
+                    const icon = action.type === 'good' ? 'fa-hands-praying' : 'fa-hand-fist';
+                    
+                    li.innerHTML = `
+                        <div class="action-icon">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="action-details">
+                            <div class="action-title">${action.description}</div>
+                            <div class="action-time">${formatDate(action.timestamp)}</div>
+                        </div>
+                        <button class="action-delete" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    
+                    if (action.type === 'good') {
+                        goodList.appendChild(li);
+                        goodCounter++;
+                    } else {
+                        badList.appendChild(li);
+                        badCounter++;
+                    }
+                });
+                
+                goodCount.textContent = goodCounter;
+                badCount.textContent = badCounter;
+                
+                // إضافة معالجات الأحداث لأزرار الحذف
+                document.querySelectorAll('.action-delete').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        actions.splice(index, 1);
+                        localStorage.setItem('actions', JSON.stringify(actions));
+                        updateUI();
+                    });
+                });
+            }
+            
+            // تحديث الإحصائيات
+            function updateStats() {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                
+                const dailyActions = actions.filter(action => {
+                    const actionDate = new Date(action.timestamp);
+                    return actionDate >= today;
+                });
+                
+                const monthlyActions = actions.filter(action => {
+                    const actionDate = new Date(action.timestamp);
+                    return actionDate >= monthStart;
+                });
+                
+                const dailyGood = dailyActions.filter(a => a.type === 'good').length;
+                const dailyBad = dailyActions.filter(a => a.type === 'bad').length;
+                const dailyTotal = dailyGood + dailyBad;
+                const dailyRatio = dailyTotal ? Math.round((dailyGood / dailyTotal) * 100) : 0;
+                
+                const monthlyGood = monthlyActions.filter(a => a.type === 'good').length;
+                const monthlyBad = monthlyActions.filter(a => a.type === 'bad').length;
+                const monthlyTotal = monthlyGood + monthlyBad;
+                const monthlyRatio = monthlyTotal ? Math.round((monthlyGood / monthlyTotal) * 100) : 0;
+                
+                goodCountDay.textContent = dailyGood;
+                badCountDay.textContent = dailyBad;
+                ratioDay.textContent = `${dailyRatio}%`;
+                
+                goodCountMonth.textContent = monthlyGood;
+                badCountMonth.textContent = monthlyBad;
+                ratioMonth.textContent = `${monthlyRatio}%`;
+            }
+            
+            // تحديث المخططات
+            function updateCharts() {
+                if (dailyChart) dailyChart.destroy();
+                if (monthlyChart) monthlyChart.destroy();
+                
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                
+                const dailyActions = actions.filter(action => new Date(action.timestamp) >= today);
+                const monthlyActions = actions.filter(action => new Date(action.timestamp) >= monthStart);
+                
+                const dailyGood = dailyActions.filter(a => a.type === 'good').length;
+                const dailyBad = dailyActions.filter(a => a.type === 'bad').length;
+                
+                const monthlyGood = monthlyActions.filter(a => a.type === 'good').length;
+                const monthlyBad = monthlyActions.filter(a => a.type === 'bad').length;
+                
+                // مخطط اليومي
+                dailyChart = new Chart(dailyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['الحسنات', 'السيئات'],
+                        datasets: [{
+                            data: [dailyGood, dailyBad],
+                            backgroundColor: ['#28a745', '#dc3545'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                rtl: true,
+                                labels: {
+                                    font: {
+                                        family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // مخطط الشهري
+                monthlyChart = new Chart(monthlyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['الحسنات', 'السيئات'],
+                        datasets: [{
+                            data: [monthlyGood, monthlyBad],
+                            backgroundColor: ['#28a745', '#dc3545'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                rtl: true,
+                                labels: {
+                                    font: {
+                                        family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // تنسيق التاريخ
+            function formatDate(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('ar-EG', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+            
+            // إضافة عمل جديد
+            function addAction(type) {
+                const description = actionInput.value.trim();
+                if (!description) return;
+                
+                const action = {
+                    type,
+                    description,
+                    timestamp: new Date().toISOString()
+                };
+                
+                actions.push(action);
+                localStorage.setItem('actions', JSON.stringify(actions));
+                actionInput.value = '';
+                actionInput.focus();
+                updateUI();
+                
+                // إضافة مؤثر بصري
+                if (type === 'good') {
+                    addGoodBtn.classList.add('pulse');
+                    setTimeout(() => addGoodBtn.classList.remove('pulse'), 300);
+                } else {
+                    addBadBtn.classList.add('pulse');
+                    setTimeout(() => addBadBtn.classList.remove('pulse'), 300);
+                }
+            }
+            
+            // معالجة الأحداث
+            addGoodBtn.addEventListener('click', () => addAction('good'));
+            addBadBtn.addEventListener('click', () => addAction('bad'));
+            
+            actionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addAction('good');
+                }
+            });
+            
+            // التهيئة الأولية
+            updateUI();
+        });
+    </script>
+</body>
+</html>
