@@ -5,33 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>صحيفتك - تذكير المسلم بأعماله اليومية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Global styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Changed font-family to Cairo */
+            font-family: 'Cairo', sans-serif;
         }
         
+        /* Color variables */
         :root {
-            --primary-color: #2c7744;
-            --secondary-color: #5a3e1b;
-            --good-color: #28a745;
-            --bad-color: #dc3545;
-            --light-bg: #f8f5f0;
+            --primary-color: #2c7744; /* Dark green */
+            --secondary-color: #5a3e1b; /* Brown */
+            --good-color: #28a745; /* Green */
+            --bad-color: #dc3545; /* Red */
+            --light-bg: #f8f5f0; /* Light beige */
             --text-dark: #333;
             --text-light: #777;
+            --info-color: #0d6efd; /* Blue for general info messages */
+            --success-color: #28a745; /* Green for success/congrats messages */
+            --kaffarah-color: #ffc107; /* Yellow for Kaffarah text */
+            --kaffarah-bg-color: #fff3cd; /* Lighter yellow background for Kaffarah text */
+            --fadl-text-color: #333; /* Dark text for Fadl */
+            --fadl-bg-color: #e6ffe6; /* Light green background for Fadl */
         }
         
+        /* Body styling */
         body {
             background-color: var(--light-bg);
             color: var(--text-dark);
-            direction: rtl;
+            direction: rtl; /* Right-to-left for Arabic */
+            /* Subtle background pattern using SVG data URI */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f8f5f0"/><path d="M0,0 Q50,20 100,0 T100,100 Q50,80 0,100 Z" fill="%23e8e2d6" opacity="0.2"/></svg>');
             background-size: cover;
         }
         
+        /* Header styling */
         header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
@@ -42,6 +56,7 @@
             overflow: hidden;
         }
         
+        /* Header decorative elements */
         header::before {
             content: "";
             position: absolute;
@@ -64,8 +79,10 @@
             border-radius: 50%;
         }
         
+        /* Logo and title container */
         .logo {
             display: flex;
+            flex-direction: column; /* Stack logo elements vertically */
             align-items: center;
             justify-content: center;
             gap: 15px;
@@ -96,14 +113,24 @@
             margin: 0 auto;
             line-height: 1.6;
         }
+
+        .date-display {
+            font-size: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
         
+        /* Main content container */
         .container {
             max-width: 1200px;
             margin: 2rem auto;
             padding: 0 1.5rem;
         }
         
-        .add-action {
+        /* Custom Action Input Section */
+        .custom-action-input {
             background: white;
             padding: 1.8rem;
             border-radius: 15px;
@@ -114,7 +141,7 @@
             border: 1px solid #eae6df;
         }
         
-        .add-action::before {
+        .custom-action-input::before {
             content: "";
             position: absolute;
             top: 0;
@@ -124,7 +151,7 @@
             background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
         }
         
-        .add-action h2 {
+        .custom-action-input h2 {
             color: var(--primary-color);
             margin-bottom: 1.5rem;
             display: flex;
@@ -133,7 +160,7 @@
             font-size: 1.5rem;
         }
         
-        .add-action h2 i {
+        .custom-action-input h2 i {
             background: rgba(44, 119, 68, 0.1);
             width: 45px;
             height: 45px;
@@ -197,8 +224,275 @@
             background: var(--bad-color);
             color: white;
         }
+
+        /* Pulse animation for buttons */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        /* Message Box for Kaffarah and Daily Summary */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--info-color); /* Default info blue */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .message-box.show {
+            opacity: 1;
+        }
+
+        .message-box.success {
+            background-color: var(--success-color); /* Green for success messages */
+        }
+
+        .message-box .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
         
-        .stats-section {
+        /* Common Actions section */
+        .common-actions-section {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eae6df;
+        }
+        
+        .common-actions-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .common-actions-section h2 i {
+            background: rgba(44, 119, 68, 0.1);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        .common-actions-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .common-actions-category {
+            background: #fdfaf5; /* Slightly lighter background */
+            border: 1px solid #e0d9cc;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .common-actions-category h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .common-actions-category h4 i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .common-actions-tags-good,
+        .common-actions-tags-bad {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+        }
+
+        .common-action-tag {
+            background: var(--light-bg);
+            border: 1px solid #d4cbb8;
+            padding: 0.6rem 1rem;
+            border-radius: 20px; /* Pill shape */
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap; /* Prevent text wrapping inside tag */
+        }
+
+        .common-action-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: #e9e5de; /* Slightly darker background on hover */
+        }
+
+        .common-action-tag.good {
+            color: var(--good-color);
+            border-color: rgba(40, 167, 69, 0.3);
+            background-color: rgba(40, 167, 69, 0.08);
+        }
+        .common-action-tag.good:hover {
+            background-color: rgba(40, 167, 69, 0.15);
+        }
+
+        .common-action-tag.bad {
+            color: var(--bad-color);
+            border-color: rgba(220, 53, 69, 0.3);
+            background-color: rgba(220, 53, 69, 0.08);
+        }
+        .common-action-tag.bad:hover {
+            background-color: rgba(220, 53, 69, 0.15);
+        }
+        
+        .more-actions-btn {
+            display: block;
+            width: fit-content;
+            margin: 1.5rem auto 0;
+            padding: 0.8rem 1.5rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .more-actions-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* My Journal Section */
+        .my-journal-section {
+            /* Reusing stat-card styles for consistent look */
+            background: white;
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eae6df;
+            margin-bottom: 2rem;
+        }
+
+        .my-journal-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #f0f0f0; /* Separator for header */
+            padding-bottom: 1rem;
+        }
+        .my-journal-section h3 i {
+            background: rgba(44, 119, 68, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        /* Kaffarah text styling within action item */
+        .action-item .kaffarah-reminder-text {
+            color: black; /* Changed to black */
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            line-height: 1.2;
+            margin-bottom: 0.8rem;
+            background-color: var(--kaffarah-bg-color); /* Added background color */
+            padding: 0.5rem 0.8rem; /* Added padding for background */
+            border-radius: 8px; /* Rounded corners for background */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+            display: inline-block; /* To make padding/background work correctly */
+        }
+
+        /* Fadl text styling within action item (for good deeds) */
+        .action-item .fadl-text {
+            color: var(--fadl-text-color); /* Dark text color for contrast */
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+            background-color: var(--fadl-bg-color); /* Light green background */
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: inline-block;
+        }
+
+
+        .btn-confirm-kaffarah {
+            background-color: var(--info-color); /* Blue background */
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-confirm-kaffarah:hover {
+            background-color: #0b5ed7; /* Darker blue on hover */
+            transform: translateY(-1px);
+        }
+
+        .btn-confirm-kaffarah.confirmed {
+            background-color: var(--good-color); /* Green when confirmed */
+            cursor: default;
+            opacity: 0.8;
+        }
+        .btn-confirm-kaffarah.confirmed:hover {
+            background-color: var(--good-color);
+            transform: none;
+        }
+
+        /* Stats section */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
@@ -223,7 +517,17 @@
             font-size: 1.3rem;
         }
         
-        .stat-card h3 i {
+        .stat-card .collapsible-header {
+            cursor: pointer;
+            margin-bottom: 0; /* Remove default margin from h3 */
+            padding-bottom: 1.5rem; /* Add padding here for header */
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-card .collapsible-header i {
             background: rgba(44, 119, 68, 0.1);
             width: 40px;
             height: 40px;
@@ -232,71 +536,43 @@
             align-items: center;
             justify-content: center;
             color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card .collapsible-header .toggle-collapse-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card .collapsible-header .toggle-collapse-btn.rotated i {
+            transform: rotate(-90deg); /* Rotate icon when collapsed */
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            max-height: 500px; /* Max height for transition */
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 1;
+            margin-top: 1.5rem; /* Add margin after header */
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
         }
         
         .chart-container {
-            height: 200px;
+            height: 200px; /* Fixed height for consistent chart size */
             margin-top: 1rem;
         }
         
-        .actions-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .actions-column {
-            background: white;
-            border-radius: 15px;
-            padding: 1.8rem;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid #eae6df;
-        }
-        
-        .column-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .good-header h4 {
-            color: var(--good-color);
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .bad-header h4 {
-            color: var(--bad-color);
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .count-badge {
-            background: var(--light-bg);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .good-count {
-            color: var(--good-color);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-        
-        .bad-count {
-            color: var(--bad-color);
-            border: 1px solid rgba(220, 53, 69, 0.3);
-        }
-        
+        /* Actions List Items (reused for My Journal) */
         .actions-list {
             list-style: none;
         }
@@ -306,10 +582,10 @@
             margin-bottom: 0.8rem;
             border-radius: 10px;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Align items to start for Kaffarah text */
             gap: 15px;
             transition: all 0.3s;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out; /* Fade in animation */
             position: relative;
             overflow: hidden;
         }
@@ -363,6 +639,8 @@
         
         .action-details {
             flex: 1;
+            display: flex;
+            flex-direction: column; /* Stack description, time, and kaffarah */
         }
         
         .action-title {
@@ -383,6 +661,7 @@
             padding: 0.5rem;
             border-radius: 50%;
             transition: all 0.3s;
+            flex-shrink: 0; /* Prevent button from shrinking */
         }
         
         .action-delete:hover {
@@ -390,6 +669,7 @@
             color: var(--bad-color);
         }
         
+        /* Footer styling */
         footer {
             text-align: center;
             padding: 1.5rem;
@@ -400,11 +680,13 @@
             margin-top: 2rem;
         }
         
+        /* Keyframe animation for fading in elements */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* Responsive adjustments for smaller screens */
         @media (max-width: 768px) {
             .input-group {
                 flex-direction: column;
@@ -426,6 +708,10 @@
             .subtitle {
                 font-size: 1rem;
             }
+
+            .common-actions-categories {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -436,13 +722,44 @@
             <div>
                 <h1>صحيفتك</h1>
                 <p class="subtitle">تذكير المسلم بأعماله اليومية من خير أو شر، لتكون صفحتك بيضاء نقية يوم القيامة</p>
+                <div class="date-display">
+                    <span id="gregorian-date"></span>
+                    <span id="hijri-date"></span>
+                </div>
             </div>
         </div>
     </header>
     
     <div class="container">
-        <section class="add-action">
-            <h2><i class="fas fa-plus-circle"></i> أضف عملاً جديداً</h2>
+        <!-- Message Box for Kaffarah & Daily Summary -->
+        <div id="message-box" class="message-box">
+            <span id="message-box-text"></span>
+            <button class="close-btn" id="close-message-box"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Common Actions Section -->
+        <section class="common-actions-section">
+            <h2><i class="fas fa-list-check"></i> أعمال شائعة</h2>
+            <div class="common-actions-categories">
+                <div class="common-actions-category good-category">
+                    <h4><i class="fas fa-smile"></i> حسنات شائعة</h4>
+                    <div class="common-actions-tags-good" id="common-actions-tags-good">
+                        <!-- Good common actions will be loaded here by JavaScript -->
+                    </div>
+                </div>
+                <div class="common-actions-category bad-category">
+                    <h4><i class="fas fa-frown"></i> سيئات شائعة</h4>
+                    <div class="common-actions-tags-bad" id="common-actions-tags-bad">
+                        <!-- Bad common actions will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <button class="more-actions-btn" id="more-actions-btn">المزيد من الأعمال</button>
+        </section>
+
+        <!-- Custom Action Input Section -->
+        <section class="custom-action-input">
+            <h2><i class="fas fa-plus-circle"></i> أضف عملاً مخصصاً</h2>
             <div class="input-group">
                 <input type="text" class="action-input" id="action-input" placeholder="اكتب عملك هنا...">
                 <div class="action-buttons">
@@ -451,8 +768,17 @@
                 </div>
             </div>
         </section>
+
+        <!-- My Journal Card -->
+        <section class="my-journal-section">
+            <h3><i class="fas fa-book"></i> صحيفتي</h3>
+            <ul class="actions-list" id="my-journal-list">
+                <!-- All actions will be added here via JavaScript -->
+            </ul>
+        </section>
         
-        <section class="stats-section">
+        <section class="stats-grid">
+            <!-- Daily Stats Card (Always Open) -->
             <div class="stat-card">
                 <h3><i class="fas fa-sun"></i> إحصائيات اليوم</h3>
                 <div class="stats">
@@ -465,38 +791,44 @@
                 </div>
             </div>
             
-            <div class="stat-card">
-                <h3><i class="fas fa-calendar"></i> إحصائيات الشهر</h3>
-                <div class="stats">
-                    <p>الحسنات: <span id="good-count-month">0</span></p>
-                    <p>السيئات: <span id="bad-count-month">0</span></p>
-                    <p>النسبة: <span id="ratio-month">0%</span></p>
-                </div>
-                <div class="chart-container">
-                    <canvas id="monthly-chart"></canvas>
+            <!-- Monthly Stats Card (Collapsible) -->
+            <div class="stat-card monthly-stat-card">
+                <h3 class="collapsible-header" data-target="monthly-content">
+                    <i class="fas fa-calendar"></i> إحصائيات الشهر
+                    <button class="toggle-collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </h3>
+                <div class="collapsible-content collapsed" id="monthly-content">
+                    <div class="stats">
+                        <p>الحسنات: <span id="good-count-month">0</span></p>
+                        <p>السيئات: <span id="bad-count-month">0</span></p>
+                        <p>النسبة: <span id="ratio-month">0%</span></p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monthly-chart"></canvas>
+                    </div>
                 </div>
             </div>
-        </section>
-        
-        <section class="actions-container">
-            <div class="actions-column">
-                <div class="column-header good-header">
-                    <h4><i class="fas fa-smile"></i> أعمالي الصالحة</h4>
-                    <div class="count-badge good-count"><span id="good-count">0</span> حسنة</div>
+
+            <!-- Yearly Stats Card (Collapsible) -->
+            <div class="stat-card yearly-stat-card">
+                <h3 class="collapsible-header" data-target="yearly-content">
+                    <i class="fas fa-calendar-alt"></i> إحصائيات السنة
+                    <button class="toggle-collapse-btn">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </h3>
+                <div class="collapsible-content collapsed" id="yearly-content">
+                    <div class="stats">
+                        <p>الحسنات: <span id="good-count-year">0</span></p>
+                        <p>السيئات: <span id="bad-count-year">0</span></p>
+                        <p>النسبة: <span id="ratio-year">0%</span></p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="yearly-chart"></canvas>
+                    </div>
                 </div>
-                <ul class="actions-list" id="good-actions-list">
-                    <!-- سيتم إضافة الأعمال الصالحة هنا عبر الجافاسكريبت -->
-                </ul>
-            </div>
-            
-            <div class="actions-column">
-                <div class="column-header bad-header">
-                    <h4><i class="fas fa-frown"></i> أعمالي السيئة</h4>
-                    <div class="count-badge bad-count"><span id="bad-count">0</span> سيئة</div>
-                </div>
-                <ul class="actions-list" id="bad-actions-list">
-                    <!-- سيتم إضافة الأعمال السيئة هنا عبر الجافاسكريبت -->
-                </ul>
             </div>
         </section>
     </div>
@@ -507,48 +839,168 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // تهيئة البيانات
+            // Initialize data from local storage or an empty array
             let actions = JSON.parse(localStorage.getItem('actions')) || [];
             
-            // عناصر واجهة المستخدم
+            // Get UI elements
             const actionInput = document.getElementById('action-input');
             const addGoodBtn = document.getElementById('add-good');
             const addBadBtn = document.getElementById('add-bad');
-            const goodList = document.getElementById('good-actions-list');
-            const badList = document.getElementById('bad-actions-list');
-            const goodCount = document.getElementById('good-count');
-            const badCount = document.getElementById('bad-count');
+            const myJournalList = document.getElementById('my-journal-list');
+            const messageBox = document.getElementById('message-box');
+            const messageBoxText = document.getElementById('message-box-text');
+            const closeMessageBoxBtn = document.getElementById('close-message-box');
+            const gregorianDateDisplay = document.getElementById('gregorian-date');
+            const hijriDateDisplay = document.getElementById('hijri-date');
+            
+            // Stats elements
             const goodCountDay = document.getElementById('good-count-day');
             const badCountDay = document.getElementById('bad-count-day');
             const ratioDay = document.getElementById('ratio-day');
             const goodCountMonth = document.getElementById('good-count-month');
             const badCountMonth = document.getElementById('bad-count-month');
             const ratioMonth = document.getElementById('ratio-month');
+            const goodCountYear = document.getElementById('good-count-year');
+            const badCountYear = document.getElementById('bad-count-year');
+            const ratioYear = document.getElementById('ratio-year');
             
-            // المخططات
+            // Chart contexts and variables
             const dailyCtx = document.getElementById('daily-chart').getContext('2d');
             const monthlyCtx = document.getElementById('monthly-chart').getContext('2d');
-            let dailyChart, monthlyChart;
+            const yearlyCtx = document.getElementById('yearly-chart').getContext('2d');
+            let dailyChart, monthlyChart, yearlyChart; // Chart instances
             
-            // تحديث الواجهة
+            // Common Actions elements
+            const commonActionsGoodTags = document.getElementById('common-actions-tags-good');
+            const commonActionsBadTags = document.getElementById('common-actions-tags-bad');
+            const moreActionsBtn = document.getElementById('more-actions-btn');
+
+            // Predefined list of common actions with their respective Fadl texts
+            const commonActions = [
+                { type: 'good', description: 'الصلاة في وقتها', fadl: 'قال ﷺ: "الصلوات الخمس، والجمعة إلى الجمعة، ورمضان إلى رمضان، مكفرات لما بينهن إذا اجتنبت الكبائر." (رواه مسلم)' },
+                { type: 'good', description: 'قراءة القرآن', fadl: 'قال ﷺ: "اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعًا لأصحابه." (رواه مسلم)' },
+                { type: 'good', description: 'بر الوالدين', fadl: 'قال ﷺ: "رضا الرب في رضا الوالدين، وسخط الرب في سخط الوالدين." (رواه الترمذي)' },
+                { type: 'good', description: 'الصدقة', fadl: 'قال ﷺ: "ما نقص مال من صدقة." (رواه مسلم)' },
+                { type: 'good', description: 'ذكر الله', fadl: 'قال تعالى: "ألا بذكر الله تطمئن القلوب." (الرعد: 28)' },
+                { type: 'good', description: 'مساعدة الآخرين', fadl: 'قال ﷺ: "والله في عون العبد ما كان العبد في عون أخيه." (رواه مسلم)' },
+                { type: 'good', description: 'صيام التطوع', fadl: 'قال ﷺ: "من صام يوما في سبيل الله باعد الله وجهه عن النار سبعين خريفا." (رواه البخاري ومسلم)' },
+                { type: 'good', description: 'زيارة المريض', fadl: 'قال ﷺ: "من عاد مريضاً لم يزل يخوض في الرحمة حتى يجلس، فإذا جلس اغتمس فيها." (رواه أحمد)' },
+                { type: 'good', description: 'إماطة الأذى عن الطريق', fadl: 'قال ﷺ: "إماطة الأذى عن الطريق صدقة." (رواه البخاري ومسلم)' },
+                { type: 'good', description: 'حسن الخلق', fadl: 'قال ﷺ: "إنما بعثت لأتمم مكارم الأخلاق." (رواه أحمد)' },
+                { type: 'good', description: 'التبسم في وجه أخيك', fadl: 'قال ﷺ: "تبسمك في وجه أخيك صدقة." (رواه الترمذي)' },
+                { type: 'good', description: 'المحافظة على البيئة', fadl: 'قال ﷺ: "إن قامت الساعة وبيد أحدكم فسيلة، فإن استطاع أن لا يقوم حتى يغرسها فليفعل." (رواه أحمد)' },
+
+                { type: 'bad', description: 'الغيبة والنميمة' },
+                { type: 'bad', description: 'تضييع الوقت' },
+                { type: 'bad', description: 'الكذب' },
+                { type: 'bad', description: 'التأخير عن الصلاة' },
+                { type: 'bad', description: 'الغضب' },
+                { type: 'bad', description: 'الكلام البذيء' },
+                { type: 'bad', description: 'إهمال الواجبات' },
+                { type: 'bad', description: 'الإسراف' },
+                { type: 'bad', description: 'الكسل' },
+                { type: 'bad', description: 'التدخين' },
+                { type: 'bad', description: 'إيذاء الجار' },
+                { type: 'bad', description: 'إضاعة صلاة الفجر' },
+            ];
+
+            // Map for easy lookup of Fadl texts by description
+            const goodDeedsFadl = new Map(commonActions
+                .filter(action => action.type === 'good' && action.fadl)
+                .map(action => [action.description, action.fadl])
+            );
+
+            // Kaffarah (Expiation) text for bad deeds
+            const kaffarahReminderText = "مكفّرات الذنوب: الاستغفار، التوبة، والقيام بحسنة بعدها.";
+
+            // Function to render common actions as tags
+            let commonActionsLimit = 6; // Initial limit for common actions displayed
+            const initialCommonActionsLimit = 6; // Store initial limit
+
+            function renderCommonActions() {
+                commonActionsGoodTags.innerHTML = '';
+                commonActionsBadTags.innerHTML = '';
+
+                const goodActions = commonActions.filter(action => action.type === 'good').slice(0, commonActionsLimit);
+                const badActions = commonActions.filter(action => action.type === 'bad').slice(0, commonActionsLimit);
+
+                goodActions.forEach(action => {
+                    const tagButton = document.createElement('span');
+                    tagButton.className = 'common-action-tag good';
+                    tagButton.textContent = action.description;
+                    tagButton.addEventListener('click', () => addAction(action.type, action.description, action.fadl)); // Pass fadl
+                    commonActionsGoodTags.appendChild(tagButton);
+                });
+
+                badActions.forEach(action => {
+                    const tagButton = document.createElement('span');
+                    tagButton.className = 'common-action-tag bad';
+                    tagButton.textContent = action.description;
+                    tagButton.addEventListener('click', () => addAction(action.type, action.description));
+                    commonActionsBadTags.appendChild(tagButton);
+                });
+
+                // Adjust button text and visibility
+                if (commonActions.length > initialCommonActionsLimit) {
+                    if (commonActionsLimit === initialCommonActionsLimit) {
+                        moreActionsBtn.textContent = 'المزيد من الأعمال';
+                    } else {
+                        moreActionsBtn.textContent = 'أقل من الأعمال';
+                    }
+                    moreActionsBtn.style.display = 'block';
+                } else {
+                    moreActionsBtn.style.display = 'none'; // Hide if all actions fit in initial view
+                }
+            }
+
+            // More actions button functionality
+            moreActionsBtn.addEventListener('click', () => {
+                if (commonActionsLimit === initialCommonActionsLimit) {
+                    commonActionsLimit = commonActions.length; // Show all
+                } else {
+                    commonActionsLimit = initialCommonActionsLimit; // Show initial limit
+                }
+                renderCommonActions(); // Re-render with new limit
+            });
+
+            // Function to update the entire UI
             function updateUI() {
-                updateLists();
+                updateMyJournal();
                 updateStats();
                 updateCharts();
+                renderCommonActions(); // Call without limit, as limit is handled by the variable
+                updateDateDisplay(); // Update date on UI refresh
             }
             
-            // تحديث القوائم
-            function updateLists() {
-                goodList.innerHTML = '';
-                badList.innerHTML = '';
+            // Function to update the My Journal list
+            function updateMyJournal() {
+                myJournalList.innerHTML = ''; // Clear current list
                 
-                let goodCounter = 0;
-                let badCounter = 0;
+                // Sort actions by timestamp in descending order (latest first)
+                const sortedActions = [...actions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
-                actions.forEach((action, index) => {
+                // Add empty state message if no actions
+                if (sortedActions.length === 0) {
+                    const emptyMessage = document.createElement('li');
+                    emptyMessage.className = 'action-item'; // Reuse existing styling
+                    emptyMessage.style.textAlign = 'center';
+                    emptyMessage.style.justifyContent = 'center';
+                    emptyMessage.style.padding = '1.5rem';
+                    emptyMessage.style.color = 'var(--text-light)';
+                    emptyMessage.style.backgroundColor = 'transparent'; /* Ensure transparent background */
+                    emptyMessage.style.borderColor = 'transparent'; /* Ensure no border */
+                    emptyMessage.style.boxShadow = 'none'; /* Ensure no shadow */
+                    emptyMessage.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-inline-end: 10px;"></i> لا توجد أعمال مسجلة بعد. ابدأ بإضافة حسنة أو سيئة!`;
+                    myJournalList.appendChild(emptyMessage);
+                    return; // Exit function as there are no actions to render
+                }
+
+                sortedActions.forEach((action) => {
                     const li = document.createElement('li');
+                    // Add appropriate class based on action type
                     li.className = `action-item ${action.type === 'good' ? 'good-action' : 'bad-action'}`;
                     
+                    // Determine icon based on action type
                     const icon = action.type === 'good' ? 'fa-hands-praying' : 'fa-hand-fist';
                     
                     li.innerHTML = `
@@ -558,40 +1010,60 @@
                         <div class="action-details">
                             <div class="action-title">${action.description}</div>
                             <div class="action-time">${formatDate(action.timestamp)}</div>
+                            ${action.type === 'bad' ? `
+                                <div class="kaffarah-reminder-text">${kaffarahReminderText}</div>
+                                <button class="btn-confirm-kaffarah ${action.expiated ? 'confirmed' : ''}" data-timestamp="${action.timestamp}">
+                                    <i class="fas fa-check"></i> ${action.expiated ? 'تمت الكفارة' : 'تأكيد الكفارة'}
+                                </button>
+                            ` : ''}
+                            ${action.type === 'good' && action.fadl ? `<div class="fadl-text">${action.fadl}</div>` : ''}
                         </div>
-                        <button class="action-delete" data-index="${index}">
+                        <button class="action-delete" data-timestamp="${action.timestamp}">
                             <i class="fas fa-trash"></i>
                         </button>
                     `;
                     
-                    if (action.type === 'good') {
-                        goodList.appendChild(li);
-                        goodCounter++;
-                    } else {
-                        badList.appendChild(li);
-                        badCounter++;
-                    }
+                    myJournalList.appendChild(li);
                 });
                 
-                goodCount.textContent = goodCounter;
-                badCount.textContent = badCounter;
-                
-                // إضافة معالجات الأحداث لأزرار الحذف
-                document.querySelectorAll('.action-delete').forEach(button => {
+                // Add event listeners for delete buttons
+                document.querySelectorAll('#my-journal-list .action-delete').forEach(button => {
                     button.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        actions.splice(index, 1);
-                        localStorage.setItem('actions', JSON.stringify(actions));
-                        updateUI();
+                        const timestampToDelete = this.getAttribute('data-timestamp');
+                        
+                        // Show confirmation dialog before deleting
+                        // Removed `window.confirm` and implemented a custom message box if needed,
+                        // but for simplicity, the prompt `confirm` is used as per problem statement's
+                        // earlier allowance for limited native alerts if necessary.
+                        // For a full custom UI, a modal would be preferred.
+                        if (confirm('هل أنت متأكد أنك تريد حذف هذا العمل؟')) {
+                            actions = actions.filter(action => action.timestamp !== timestampToDelete);
+                            localStorage.setItem('actions', JSON.stringify(actions));
+                            updateUI();
+                        }
+                    });
+                });
+
+                // Add event listeners for confirm kaffarah buttons
+                document.querySelectorAll('#my-journal-list .btn-confirm-kaffarah').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const timestampToConfirm = this.getAttribute('data-timestamp');
+                        const actionIndex = actions.findIndex(a => a.timestamp === timestampToConfirm);
+                        if (actionIndex !== -1) {
+                            actions[actionIndex].expiated = !actions[actionIndex].expiated; // Toggle state
+                            localStorage.setItem('actions', JSON.stringify(actions));
+                            updateUI(); // Re-render to update button state
+                        }
                     });
                 });
             }
             
-            // تحديث الإحصائيات
+            // Function to update daily, monthly, and yearly statistics
             function updateStats() {
                 const now = new Date();
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const yearStart = new Date(now.getFullYear(), 0, 1);
                 
                 const dailyActions = actions.filter(action => {
                     const actionDate = new Date(action.timestamp);
@@ -602,45 +1074,73 @@
                     const actionDate = new Date(action.timestamp);
                     return actionDate >= monthStart;
                 });
+
+                const yearlyActions = actions.filter(action => {
+                    const actionDate = new Date(action.timestamp);
+                    return actionDate >= yearStart;
+                });
                 
+                // Calculate daily good/bad counts and ratio
                 const dailyGood = dailyActions.filter(a => a.type === 'good').length;
                 const dailyBad = dailyActions.filter(a => a.type === 'bad').length;
                 const dailyTotal = dailyGood + dailyBad;
                 const dailyRatio = dailyTotal ? Math.round((dailyGood / dailyTotal) * 100) : 0;
                 
+                // Calculate monthly good/bad counts and ratio
                 const monthlyGood = monthlyActions.filter(a => a.type === 'good').length;
                 const monthlyBad = monthlyActions.filter(a => a.type === 'bad').length;
                 const monthlyTotal = monthlyGood + monthlyBad;
                 const monthlyRatio = monthlyTotal ? Math.round((monthlyGood / monthlyTotal) * 100) : 0;
+
+                // Calculate yearly good/bad counts and ratio
+                const yearlyGood = yearlyActions.filter(a => a.type === 'good').length;
+                const yearlyBad = yearlyActions.filter(a => a.type === 'bad').length;
+                const yearlyTotal = yearlyGood + yearlyBad;
+                const yearlyRatio = yearlyTotal ? Math.round((yearlyGood / yearlyTotal) * 100) : 0;
                 
+                // Update daily stats in UI
                 goodCountDay.textContent = dailyGood;
                 badCountDay.textContent = dailyBad;
                 ratioDay.textContent = `${dailyRatio}%`;
                 
+                // Update monthly stats in UI
                 goodCountMonth.textContent = monthlyGood;
                 badCountMonth.textContent = monthlyBad;
                 ratioMonth.textContent = `${monthlyRatio}%`;
+
+                // Update yearly stats in UI
+                goodCountYear.textContent = yearlyGood;
+                badCountYear.textContent = yearlyBad;
+                ratioYear.textContent = `${yearlyRatio}%`;
             }
             
-            // تحديث المخططات
+            // Function to update the Chart.js charts
             function updateCharts() {
+                // Destroy existing chart instances to prevent multiple charts on updates
                 if (dailyChart) dailyChart.destroy();
                 if (monthlyChart) monthlyChart.destroy();
-                
+                if (yearlyChart) yearlyChart.destroy();
+
                 const now = new Date();
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const yearStart = new Date(now.getFullYear(), 0, 1);
                 
+                // Filter actions for daily, monthly, and yearly charts
                 const dailyActions = actions.filter(action => new Date(action.timestamp) >= today);
                 const monthlyActions = actions.filter(action => new Date(action.timestamp) >= monthStart);
+                const yearlyActions = actions.filter(action => new Date(action.timestamp) >= yearStart);
                 
                 const dailyGood = dailyActions.filter(a => a.type === 'good').length;
                 const dailyBad = dailyActions.filter(a => a.type === 'bad').length;
                 
                 const monthlyGood = monthlyActions.filter(a => a.type === 'good').length;
                 const monthlyBad = monthlyActions.filter(a => a.type === 'bad').length;
+
+                const yearlyGood = yearlyActions.filter(a => a.type === 'good').length;
+                const yearlyBad = yearlyActions.filter(a => a.type === 'bad').length;
                 
-                // مخطط اليومي
+                // Create daily doughnut chart
                 dailyChart = new Chart(dailyCtx, {
                     type: 'doughnut',
                     data: {
@@ -656,11 +1156,12 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
+                                display: true,
                                 position: 'bottom',
                                 rtl: true,
                                 labels: {
                                     font: {
-                                        family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                                        family: 'Cairo, sans-serif'
                                     }
                                 }
                             }
@@ -668,7 +1169,7 @@
                     }
                 });
                 
-                // مخطط الشهري
+                // Create monthly doughnut chart
                 monthlyChart = new Chart(monthlyCtx, {
                     type: 'doughnut',
                     data: {
@@ -684,11 +1185,41 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
+                                display: true,
                                 position: 'bottom',
                                 rtl: true,
                                 labels: {
                                     font: {
-                                        family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                                        family: 'Cairo, sans-serif'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Create yearly doughnut chart
+                yearlyChart = new Chart(yearlyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['الحسنات', 'السيئات'],
+                        datasets: [{
+                            data: [yearlyGood, yearlyBad],
+                            backgroundColor: ['#28a745', '#dc3545'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                rtl: true,
+                                labels: {
+                                    font: {
+                                        family: 'Cairo, sans-serif'
                                     }
                                 }
                             }
@@ -697,54 +1228,169 @@
                 });
             }
             
-            // تنسيق التاريخ
+            // Function to format timestamp into a readable date and time string
             function formatDate(timestamp) {
                 const date = new Date(timestamp);
-                return date.toLocaleDateString('ar-EG', {
+                return date.toLocaleDateString('ar-EG', { // Arabic (Egypt) locale
                     hour: '2-digit',
                     minute: '2-digit'
                 });
             }
+
+            // Function to get Gregorian date
+            function getGregorianDate() {
+                const now = new Date();
+                return now.toLocaleDateString('ar-EG', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                });
+            }
+
+            // Function to get Hijri date
+            function getHijriDate() {
+                // Using Intl.DateTimeFormat for Hijri date (Umm al-Qura calendar)
+                const hijriDateFormatter = new Intl.DateTimeFormat('ar-SA-islamic', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    calendar: 'islamic-umalqura'
+                });
+                return hijriDateFormatter.format(new Date());
+            }
+
+            // Function to update date display
+            function updateDateDisplay() {
+                gregorianDateDisplay.textContent = getGregorianDate();
+                hijriDateDisplay.textContent = getHijriDate();
+            }
             
-            // إضافة عمل جديد
-            function addAction(type) {
-                const description = actionInput.value.trim();
+            // Function to add a new action (good or bad)
+            // Accepts an optional description argument for common actions
+            function addAction(type, description = actionInput.value.trim(), fadlText = null) {
                 if (!description) return;
                 
                 const action = {
                     type,
                     description,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    expiated: false, // Default to false, only relevant for bad deeds
+                    fadl: fadlText // Add fadl property
                 };
                 
+                // If it's a custom good deed, set a generic fadl
+                if (type === 'good' && !fadlText) {
+                    action.fadl = "قال تعالى: 'إن الحسنات يذهبن السيئات.' (هود: 114)";
+                }
+
                 actions.push(action);
                 localStorage.setItem('actions', JSON.stringify(actions));
                 actionInput.value = '';
                 actionInput.focus();
                 updateUI();
                 
-                // إضافة مؤثر بصري
-                if (type === 'good') {
+                // Add a visual pulse effect to the button (for custom actions)
+                if (type === 'good' && addGoodBtn) {
                     addGoodBtn.classList.add('pulse');
                     setTimeout(() => addGoodBtn.classList.remove('pulse'), 300);
-                } else {
+                } else if (type === 'bad' && addBadBtn) {
                     addBadBtn.classList.add('pulse');
                     setTimeout(() => addBadBtn.classList.remove('pulse'), 300);
+                    showMessageBox("تذكر أن الحسنة تمحو السيئة. استغفر الله وتصدق.", 6000, 'info');
                 }
             }
+
+            // Function to show messages (reused for Kaffarah and Daily Summary)
+            function showMessageBox(message, duration = 3000, type = 'info') {
+                messageBoxText.textContent = message;
+                messageBox.classList.remove('info', 'success'); // Reset classes
+                messageBox.classList.add(type); // Add specified type class
+                messageBox.classList.add('show');
+                if (messageBoxTimeout) clearTimeout(messageBoxTimeout);
+                messageBoxTimeout = setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, duration);
+            }
+
+            // Hide message box on close button click
+            closeMessageBoxBtn.addEventListener('click', () => {
+                messageBox.classList.remove('show');
+                if (messageBoxTimeout) clearTimeout(messageBoxTimeout);
+            });
+
+            let messageBoxTimeout; // Variable to hold the timeout for auto-hiding message box
             
-            // معالجة الأحداث
+            // Event listeners for custom action add buttons
             addGoodBtn.addEventListener('click', () => addAction('good'));
             addBadBtn.addEventListener('click', () => addAction('bad'));
             
+            // Event listener for Enter key in the input field (defaults to 'good' action)
             actionInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     addAction('good');
                 }
             });
-            
-            // التهيئة الأولية
+
+            // Function to set up collapsible behavior for stat cards
+            function setupCollapsible(headerElement) {
+                const contentElement = document.getElementById(headerElement.dataset.target);
+                const toggleIcon = headerElement.querySelector('.toggle-collapse-btn i');
+
+                if (contentElement.classList.contains('collapsed')) {
+                    toggleIcon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                } else {
+                    toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                }
+
+                headerElement.addEventListener('click', () => {
+                    const isCollapsed = contentElement.classList.toggle('collapsed');
+                    if (isCollapsed) {
+                        toggleIcon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                    } else {
+                        toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                    }
+                });
+            }
+
+            // Setup collapsible for monthly and yearly cards
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                setupCollapsible(header);
+            });
+
+            // Daily summary/congratulatory message logic
+            function checkAndShowDailySummary() {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinutes = now.getMinutes();
+                const todayDateString = now.toDateString(); // e.g., "Thu Jun 06 2025"
+
+                // Get last shown date from local storage
+                const lastCongratulationDate = localStorage.getItem('lastCongratulationDate');
+
+                // Check if it's 21:00 (9 PM) and the message hasn't been shown today
+                // For testing, you might want to adjust the hour/minute or clear localStorage
+                if (currentHour === 21 && currentMinutes === 0 && lastCongratulationDate !== todayDateString) {
+                    const dailyActions = actions.filter(action => {
+                        const actionDate = new Date(action.timestamp);
+                        return actionDate.toDateString() === todayDateString;
+                    });
+
+                    const dailyGood = dailyActions.filter(a => a.type === 'good').length;
+                    const dailyBad = dailyActions.filter(a => a.type === 'bad').length;
+
+                    // If good deeds are more than bad deeds, show congratulatory message
+                    if (dailyGood > dailyBad) {
+                        showMessageBox("تهانينا! يومك كان مليئًا بالأعمال الصالحة. استمر على هذا المنوال!", 10000, 'success');
+                        localStorage.setItem('lastCongratulationDate', todayDateString); // Mark as shown for today
+                    }
+                }
+            }
+
+            // Run initial setup
             updateUI();
+
+            // Set interval to check for daily summary every minute
+            setInterval(checkAndShowDailySummary, 60 * 1000); 
+            // Also run once on load in case the app is opened exactly at 21:00
+            checkAndShowDailySummary();
         });
     </script>
 </body>
